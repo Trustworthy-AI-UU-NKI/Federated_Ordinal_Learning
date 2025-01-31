@@ -13,6 +13,7 @@ To test, you can use ```test.py``` to test the models and generate the confusion
 * Code refactoring: create a base class for the local update, with child classes that inherit from this base class for the different FL methods.
 * Add requirements.txt
 * Upload sample of bash file to run the scripts.
+* Upload checkpoints to [huggingface](https://huggingface.co/trustworthy-ai)
 
 ### Acknowledgements
 
