@@ -1,0 +1,10 @@
+CSAWM:
+  toc_path: /processing/v.corbetta/CSAW-M/labels/CSAW-M_train.csv
+  seed: 42
+  folds: 5
+  alpha_p_combinations:
+    [[0.9, 0.8], [1.5, 0.85], [2.0, 0.9], [5.0, 0.95], [10.0, 0.99]]
+  num_centres: 5
+  num_classes: [4, 6, 8]
+  csv_path: /projects/federated_ordinal_classification/FederatedOrdinality/data/splits/csaw_m/midl_splits
+  bubbleplot_path: /projects/federated_ordinal_classification/results/bubbleplots/csaw_m/midl_plots
