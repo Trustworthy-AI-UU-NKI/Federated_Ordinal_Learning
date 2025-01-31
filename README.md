@@ -6,7 +6,7 @@ To split the data according to the Bernoulli-Dirichlet distribution you can use 
 
 You can train the different FL methods by running the appropriate ```train_FLMODELNAME.py``` script. You can change the config options as command line arguments. 
 
-To test, you can use ```test_with_embeddings.py``` to test the models and generate the confusion matrices. 
+To test, you can use ```test.py``` to test the models and generate the confusion matrices. 
 
 ### TO-DOs
 
