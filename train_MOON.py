@@ -27,11 +27,6 @@ from utils.local_training import LocalUpdateMOON
 from utils.utils import get_num_classes, set_seed
 
 
-# BIG TODO: now we make it work for ce and bce, but there are some parts where having we
-# will porbably have go separate num_class in two variables num_class_dataset and num_class_loss
-# to make it work with ordinal encoding
-
-
 def args_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", type=str, default="CSAWM", help="dataset name")
@@ -232,13 +227,10 @@ if __name__ == "__main__":
                     args.n_clients = 20
                 else:
                     args.n_clients = 5
-                # What did I modify? We now have a list of datasets for the training of the clients, validation is like in their code basically
 
                 # ------------------------------ global and local settings ------------------------------
                 num_classes = get_num_classes(args.loss, args.num_classes)
-                net_glob = ResNetWithProjector(args=args).to(
-                    device
-                )  # TODO: for now n_classes is only used to instantiate the model, still compatible with OE
+                net_glob = ResNetWithProjector(args=args).to(device)
                 print(net_glob)
                 net_glob.train()
                 w_glob = net_glob.state_dict()
@@ -258,7 +250,7 @@ if __name__ == "__main__":
                             device,
                             net_glob,
                         )
-                    )  # Modified so that it already takes tha lists of data loaders for each client, while now the splits are performed inside LocalUpdate
+                    )
                     w_locals.append(copy.deepcopy(w_glob))
                     net_locals.append(copy.deepcopy(net_glob).to(device))
                 print(f"Done with instantiating clients")
@@ -303,7 +295,6 @@ if __name__ == "__main__":
 
                     # global validation
                     net_glob = net_glob.to(device)
-                    # bacc_g, conf_matrix = compute_bacc(net_glob, val_loader, get_confusion_matrix=True, args=args)
                     metrics = evaluate_fn(
                         net_glob, val_loader, device, args.loss, num_classes
                     )

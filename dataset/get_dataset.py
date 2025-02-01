@@ -7,8 +7,6 @@ from torchvision.transforms import transforms
 import albumentations as A
 from albumentations.core.transforms_interface import ImageOnlyTransform
 from albumentations.pytorch.transforms import ToTensorV2
-from dataset.dataset import SkinDataset, ichDataset
-from dataset.randaugment import rand_augment_transform
 
 
 class RepeatChannelsEinopsd(ImageOnlyTransform):

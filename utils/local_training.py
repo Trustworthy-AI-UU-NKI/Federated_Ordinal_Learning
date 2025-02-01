@@ -250,67 +250,6 @@ class LocalUpdateMOON(object):
 
         return net.state_dict(), np.array(epoch_loss_total).mean()
 
-    # def train_moon(self, net, writer=None):
-    #     global_model = copy.deepcopy(net)
-    #     self.old_model.to(self.device)
-    #     net.train()
-    #     # set the optimizer
-    #     if self.args.optimizer == "adam":
-    #         self.optimizer = torch.optim.Adam(
-    #             net.parameters(), lr=self.lr, betas=(0.9, 0.999), weight_decay=5e-4
-    #         )
-    #     elif self.args.optimizer == "sgd":
-    #         self.optimizer = torch.optim.SGD(net.parameters(), lr=self.lr, weight_decay=1e-4)
-    #     else:
-    #         raise NotImplementedError
-    #     print(f"Id: {self.id}, Num: {len(self.local_dataset)}")
-    #     logging.info(f"Id: {self.id}, Num: {len(self.local_dataset)}")
-    #     # train and update
-    #     epoch_loss_total, epoch_loss_ce, epoch_loss_con = [], [], []
-    #     ce_criterion = nn.CrossEntropyLoss()
-    #     cos = nn.CosineSimilarity(dim=-1)
-    #     for epoch in range(self.args.local_ep):
-    #         batch_loss_total, batch_loss_ce, batch_loss_con = [], [], []
-    #         for images, labels in self.ldr_train:
-    #             if isinstance(images, list):
-    #                 images = images[0]
-    #             images, labels = images.to(self.device), labels.to(self.device)
-    #             rep, logits = net(images, project=True)  # check that this is correct
-    #             ce_loss = ce_criterion(logits, labels)
-
-    #             rep_old, _ = self.old_model(images, project=True).detach()
-    #             rep_global, _ = global_model(images, project=True).detach()
-    #             posi = cos(rep, rep_global)
-    #             logi = posi.reshape(-1, 1)
-    #             nega = cos(rep, rep_old)
-    #             logi = torch.cat((logi, nega.reshape(-1, 1)), dim=1)
-    #             logi /= self.args.tau
-    #             labels_con = torch.zeros(images.size(0)).cuda().long()
-    #             loss_con = self.args.mu * ce_criterion(logi, labels_con)
-
-    #             loss_total = ce_loss + loss_con
-
-    #             self.optimizer.zero_grad()
-    #             loss_total.backward()
-    #             self.optimizer.step()
-
-    #             batch_loss_ce.append(ce_loss.item())
-    #             batch_loss_con.append(loss_con.item())
-    #             batch_loss_total.append(loss_total.item())
-
-    #             self.iter_num += 1
-    #         self.epoch += 1
-    #         epoch_loss_total.append(np.array(batch_loss_total).mean())
-    #         epoch_loss_ce.append(np.array(batch_loss_ce).mean())
-    #         epoch_loss_con.append(np.array(batch_loss_con).mean())
-    #         logging.info(
-    #             f"Epoch {epoch}, client{self.id}/total loss: {epoch_loss_total}, ce loss: {epoch_loss_ce}, con loss: {epoch_loss_con}"
-    #         )
-
-    #     self.old_model = copy.deepcopy(net)
-
-    #     return net.state_dict(), np.array(epoch_loss_total).mean()
-
 
 class LocalUpdateFedALA(object):
     def __init__(self, args, id, dataset, num_classes, device, net):

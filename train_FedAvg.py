@@ -27,11 +27,6 @@ from utils.local_training import LocalUpdate
 from utils.utils import set_seed, get_num_classes
 
 
-# BIG TODO: now we make it work for ce and bce, but there are some parts where having we
-# will porbably have go separate num_class in two variables num_class_dataset and num_class_loss
-# to make it work with ordinal encoding
-
-
 def args_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset", type=str, default="CSAWM", help="dataset name")
@@ -98,7 +93,7 @@ def args_parser():
         dest="num_workers",
         type=int,
         help="Number of workers",
-        default=16,
+        default=4,
     )
     parser.add_argument(
         "--data-dir",
@@ -119,7 +114,6 @@ def args_parser():
 
 if __name__ == "__main__":
     args = args_parser()
-    # os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"{device=}")
 
@@ -187,7 +181,6 @@ if __name__ == "__main__":
                 )
                 _val_datasets = []
                 _train_datasets = []
-                # train_augs, val_augs = prepare_transforms()
                 train_augs, val_augs = prepare_transforms()
                 for centre, image_ids_labels in image_ids_labels_per_centre.items():
                     df = pd.DataFrame(image_ids_labels, columns=["Filename", "Label"])
@@ -221,7 +214,6 @@ if __name__ == "__main__":
                     args.n_clients = 20
                 else:
                     args.n_clients = 5
-                # What did I modify? We now have a list of datasets for the training of the clients, validation is like in their code basically
 
                 # ------------------------------ global and local settings ------------------------------
                 num_classes = get_num_classes(args.loss, args.num_classes)
@@ -246,7 +238,7 @@ if __name__ == "__main__":
                             num_classes,
                             device,
                         )
-                    )  # Modified so that it already takes tha lists of data loaders for each client, while now the splits are performed inside LocalUpdate
+                    )
                     w_locals.append(copy.deepcopy(w_glob))
                     net_locals.append(copy.deepcopy(net_glob).to(device))
                 print(f"Done with instantiating clients")
@@ -263,70 +255,8 @@ if __name__ == "__main__":
                         f"\n======================> round: {com_round} <======================"
                     )
                     loss_locals = []
-                    # writer.add_scalar("train/lr", lr, com_round)
-
-                    # with torch.no_grad():
-                    #     class_embedding = w_glob["model.fc.weight"].detach().clone().to(device)
-                    #     feature_avg = net_glob.projector(class_embedding).detach().clone()
-                    # logging.info("similarity before")
-                    # logging.info(
-                    #     torch.matmul(F.normalize(feature_avg, dim=1), F.normalize(feature_avg, dim=1).T)
-                    # )
-                    # feature_avg.requires_grad = True
-                    # optimizer_f = torch.optim.SGD([feature_avg], lr=0.1)
-                    # mask = torch.ones((n_classes, n_classes)) - torch.eye(
-                    #     (n_classes)
-                    # )  # TODO: check if this is compatible with ordinal encoding
-                    # mask = mask.to(
-                    #     device
-                    # )  # Mask is used to esclude self-similarities in the similarity computation
-                    # for i in range(1000):
-                    #     feature_avg_n = F.normalize(feature_avg, dim=1)
-                    #     cos_sim = torch.matmul(feature_avg_n, feature_avg_n.T)
-                    #     cos_sim = ((cos_sim * mask).max(1)[0]).sum()
-                    #     optimizer_f.zero_grad()
-                    #     cos_sim.backward()
-                    #     optimizer_f.step()
-                    # logging.info("similarity after")
-                    # logging.info(
-                    #     torch.matmul(F.normalize(feature_avg, dim=1), F.normalize(feature_avg, dim=1).T)
-                    # )
-
-                    # loss_matrix = torch.zeros(args.n_clients, n_classes)
-                    # print("Created loss matrix")
-                    # class_num = torch.zeros(args.n_clients, n_classes)
-                    # print("Initialised class_num")
                     net_glob = net_glob.to(device)
                     print("Moved model to device")
-                    # for id in range(args.n_clients):
-                    #     class_num[id] = torch.tensor(trainer_locals[id].local_dataset.get_num_class_list())
-                    #     dataset_client = TensorDataset(images_all[id], labels_all[id])
-                    #     dataLoader_client = DataLoader(
-                    #         dataset_client, batch_size=args.batch_size, shuffle=False
-                    #     )
-                    #     loss_matrix[id] = compute_loss_of_classes(
-                    #         net_glob, dataLoader_client, n_classes, device
-                    #     )
-                    # for id in tqdm(range(args.n_clients)):
-                    #     # class_num[id] = torch.tensor(
-                    #     #     trainer_locals[id].local_dataset.get_num_class_list()
-                    #     # )
-                    #     dataLoader_client = DataLoader(
-                    #         _train_datasets[id], batch_size=args.batch_size, shuffle=False
-                    #     )
-                    # loss_matrix[id] = compute_loss_of_classes(
-                    #     net_glob, dataLoader_client, n_classes, device
-                    # )
-                    # print(f"Done computing loss per class: {loss_matrix[id]}")
-                    # num = torch.sum(class_num, dim=0, keepdim=True)
-                    # logging.info("class-num of this round")
-                    # logging.info(num)
-                    # loss_matrix = loss_matrix / (1e-5 + num)
-                    # loss_class = torch.sum(
-                    #     loss_matrix, dim=0
-                    # )  # we are just normalising the loss based on the number of samples per class
-                    # logging.info("loss of this round")
-                    # logging.info(loss_class)  # loss_class is used in DALA
 
                     # local training
                     for id in range(args.n_clients):
@@ -347,7 +277,6 @@ if __name__ == "__main__":
 
                     # global validation
                     net_glob = net_glob.to(device)
-                    # bacc_g, conf_matrix = compute_bacc(net_glob, val_loader, get_confusion_matrix=True, args=args)
                     metrics = evaluate_fn(
                         net_glob, val_loader, device, args.loss, num_classes
                     )
