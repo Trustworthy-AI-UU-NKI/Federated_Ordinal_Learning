@@ -17,7 +17,7 @@ import itertools as I
 
 # from tensorboardX import SummaryWriter
 
-from utils import get_imageids_and_labels_per_centre
+from utils.utils import get_imageids_and_labels_per_centre
 from utils.FedAvg import FedAvg
 from dataset.get_dataset import prepare_transforms
 from dataset.dataset import CSAWM
